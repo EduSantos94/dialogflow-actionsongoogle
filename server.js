@@ -22,11 +22,11 @@ app.intent('ask_for_sign_in_confirmation',(conv, params, signin) => {
 /*
 * Integration with mysql to return user's name
 */
-app.intent('pesquisar.alunos', (conv, params, signin) => {
+app.intent('pesquisar.alunos', (conv, params) => {
   
-  const aluno = params.aluno
+  const email = conv.user.email
   
-  let resposta = pesquisar_aluno(aluno).then(function(results) {
+  let resposta = pesquisar_aluno(email).then(function(results) {
     
     if (typeof results[0] === 'undefined') {
       return `Registro não encontrado, verifique por erros ortograficos`
@@ -44,14 +44,14 @@ const expressApp = express().use(bodyParser.json())
 expressApp.post('process.env.URL', app)
 expressApp.listen(process.env.PORT)
 
-async function pesquisar_aluno(aluno)
+async function pesquisar_aluno(email)
 {
   return new Promise(function (resolve,reject)
   {
     var connection = mysql_connection()
     connection.connect()
     
-    var query = `SELECT * FROM aluno WHERE id_aluno = "${aluno}"`
+    var query = `SELECT * FROM aluno WHERE email = "${email}"`
     
     connection.query(query, function (error, results, fields) 
     {
