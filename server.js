@@ -21,6 +21,7 @@ app.intent('ask_for_sign_in_confirmation',(conv, params, signin) => {
 
 /*
 * Integration with mysql to return user's name
+* by using accont linking email
 */
 app.intent('pesquisar.alunos', (conv, params) => {
   
