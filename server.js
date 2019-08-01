@@ -1,73 +1,145 @@
+/*
+ * @author Eduardo dos Santos <eduardo.santos@edu.unipar.br>
+ * API que conecta com o assistente virtual Dialoflow
+ * usando o módulo actions on google e Mysql
+ */
+
 const {
   dialogflow,
   SignIn,
-  SimpleResponse
+  SimpleResponse,
+  BasicCard,
+  Button,
+  Image
 } = require('actions-on-google')
 const express = require('express');
 const bodyParser = require('body-parser')
-const mysql = require('mysql')
+const model = require('./model')
+const Helper = require('./helper')
 const app = dialogflow({ clientId : process.env.CLIENT_ID })
 
 /*
-* Intent using Google Assistant Sign In
-*/
+ * Intenção de autenticação (no momento não está sendo usada)
+ * Pois agora a autenticação já é disparada na intenção Default
+ */
 app.intent('ask_for_sign_in_confirmation',(conv, params, signin) => {
   
-  if (signin.status !== 'OK') return conv.ask(new SignIn());
+  if (signin.status !== 'OK') return conv.ask(new SignIn())
   var email = conv.user.email;
   
-  return conv.ask(`Obrigado por logar, seu email é '${email}`);
-});
+  return conv.ask(`Obrigado por logar, seu email é '${email}`)
+})
 
 /*
-* Integration with mysql to return user's name
-* by using accont linking email
-*/
+ * Intenção usada para testar a conecção com o banco
+ *
+ * @class Helper
+ * @param string email
+ */
 app.intent('pesquisar.alunos', (conv, params) => {
   
+  let helper = new Helper()
   const email = conv.user.email
   
-  let resposta = pesquisar_aluno(email).then(function(results) {
+  let resposta = model.pesquisar_aluno(email).then( function(results) {
     
-    if (typeof results[0] === 'undefined') {
-      return `Registro não encontrado, verifique por erros ortograficos`
-    } else {
-      return results[0].nome
-    }
-  }).catch((err) => setImmediate(() => { throw err; }))
+     return helper.pesquisar_aluno_results(results)
+    }).catch((err) => setImmediate(() => { throw err; }))
   
-  return resposta.then(function(result){
+  return resposta.then( function(result) {
     conv.ask(result)
   })
 })
 
+/*
+ * Pesquisa a nota do aluno
+ *
+ * @class Helper
+ * @param string materia 
+ * @param string email 
+ */
+app.intent('notas.alunos', (conv, params) => {
+
+  let helper = new Helper()
+  const materia = params.materia
+  const email = conv.user.email
+  
+  let resposta = model.notas_alunos(materia, email).then(function(results) {
+
+    return helper.notas_alunos_results(results)
+  }).catch((err) => setImmediate(() => { 
+    throw err 
+  }))
+
+  return resposta.then(function(result){
+    conv.ask(`${conv.user.profile.payload.name}, ${result}`)
+  })
+})
+
+/*
+ * Pesquisa as matérias que o aluno tem
+ *
+ * @class Helper
+ * @param string email 
+ */
+app.intent('lista.materia', (conv, params) => {
+
+  let helper = new Helper()
+  const email = conv.user.email
+  
+  let resposta = model.lista_materia(email).then(function(results) {
+    
+    return helper.lista_materia_results(results)
+  }).catch((err) => setImmediate(() => { throw err; }))
+  
+  return resposta.then(function(result){
+    conv.ask(`${conv.user.profile.payload.name}, ${result}`)
+  })
+})
+
+/*
+ * Pesquisa qual matéria o aluno tem em um determinado dia
+ *
+ * @class Helper
+ * @param string dia 
+ * @param string email 
+ */
+app.intent('aulas.alunos', (conv,params) => {
+  
+  let helper = new Helper()
+  const dia = helper.getDia(params.dia)
+  const email = conv.user.email
+
+  let resposta = model.aulas_alunos(dia, email).then(function(results) {
+    
+    return helper.aulas_alunos_results(results)
+  }).catch((err) => setImmediate(() => { throw err; }))
+  
+  return resposta.then(function(result){
+    conv.ask(`${conv.user.profile.payload.name}, ${result}`)
+  })
+})
+
+app.intent('vestibular',(conv) => {
+  conv.ask('Achei algumas informações sobre o vestibular:')
+  conv.ask(new BasicCard({
+    text: `Vestibular Unipar 2k20 será realizado dia 29/09/2019. 
+    Inscrições até o dia 13/09/2019`,
+    
+    subtitle: 'Vestibular 2k20',
+    title: 'Unipar',
+    buttons: new Button({
+      title: 'Inscreva-se já',
+      url: 'https://vestibular.unipar.br/',
+    }),
+    image: new Image({
+      url: 'https://www.unipar.br/assets/img/logo-unipar.png',
+      alt: 'Vestibular Unipar',
+    }),
+    display: 'CROPPED',
+  }));
+})
+
 const expressApp = express().use(bodyParser.json())
-expressApp.post('process.env.URL', app)
+expressApp.post(process.env.POST, app)
 expressApp.listen(process.env.PORT)
-
-async function pesquisar_aluno(email)
-{
-  return new Promise(function (resolve,reject)
-  {
-    var connection = mysql_connection()
-    connection.connect()
-    
-    var query = `SELECT * FROM aluno WHERE email = "${email}"`
-    
-    connection.query(query, function (error, results, fields) 
-    {
-      if (error) return reject(error)
-      resolve(results)
-    })
-  })
-}
-
-function mysql_connection()
-{
-  return mysql.createConnection({
-    host : process.env.MYSQL_HOST,
-    user : process.env.MYSQL_USER,
-    password : process.env.MYSQL_PASS,
-    database : process.env.MYSQL_DB
-  })
-}
