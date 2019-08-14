@@ -15,7 +15,7 @@ const {
 const express = require('express');
 const bodyParser = require('body-parser')
 const model = require('./model')
-const Helper = require('./helper')
+const Helper = require('./helper/helper_server')
 const app = dialogflow({ clientId : process.env.CLIENT_ID })
 
 /*
@@ -31,7 +31,7 @@ app.intent('ask_for_sign_in_confirmation',(conv, params, signin) => {
 })
 
 /*
- * Intenção usada para testar a conecção com o banco
+ * Intenção usada para testar a conexão com o banco
  *
  * @class Helper
  * @param string email
@@ -64,7 +64,7 @@ app.intent('notas.alunos', (conv, params) => {
   const materia = params.materia
   const email = conv.user.email
   
-  let resposta = model.notas_alunos(materia, email).then(function(results) {
+  let resposta = model.notas_alunos(email,materia).then(function(results) {
 
     return helper.notas_alunos_results(results)
   }).catch((err) => setImmediate(() => { 
@@ -120,6 +120,32 @@ app.intent('aulas.alunos', (conv,params) => {
   })
 })
 
+/*
+ * Pesquisa quanto falta para o aluno passar
+ *
+ * @class Helper
+ * @param string email
+ * @param string materia
+ */
+app.intent('notas.restante',(conv, params) => {
+  
+  let helper = new Helper()
+  const email = conv.user.email
+  const materia = params.materia
+  
+  let resposta = model.notas_restante(materia,email).then(function(results){
+    
+    return helper.notas_restante_results(results)
+  }).catch((err) => setImmediate(() => { throw err; }))
+  
+  return resposta.then(function(result){
+    conv.ask(`${conv.user.profile.payload.name}, ${result}`)
+  })
+})
+
+/*
+ * Informações do vestibular
+ */
 app.intent('vestibular',(conv) => {
   conv.ask('Achei algumas informações sobre o vestibular:')
   conv.ask(new BasicCard({
