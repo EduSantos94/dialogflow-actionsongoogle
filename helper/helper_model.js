@@ -1,4 +1,3 @@
-
 class Helper_Model
 {
   pesquisar_aluno_query()
@@ -32,6 +31,16 @@ class Helper_Model
       INNER JOIN materia AS m ON a.id_materia = m.id_materia
       WHERE a.dia = ?
       AND al.email = ?`
+  }
+  
+  notas_restante_query()
+  {
+    return `SELECT SUM(nota) as nota, m.nome as nome
+      FROM notas as n
+      INNER JOIN materia as m ON n.id_materia = m.id_materia
+      INNER JOIN aluno as a ON a.id_aluno = n.id_aluno
+      WHERE a.email = ? 
+      AND m.nome = ?`
   }
 }
 module.exports = Helper_Model
