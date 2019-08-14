@@ -4,7 +4,7 @@
  * das funções do server.js
  */
 
-class Helper
+class Helper_Server
 {
   pesquisar_aluno_results(results)
   {
@@ -110,8 +110,20 @@ class Helper
       array_element++
     } while (results.length > array_element)
         
-    return `suas matérias são: ${materias.join()}`
+    return `suas matérias são: ${materias.join('\n')}`
+  }
+  
+  notas_restante_results(results)
+  {
+    
+    if( (24-results[0].nota) > 0 ){
+      var restante = 'Faltando apenas '+(24-results[0].nota)+' para passar';
+    } else {
+      var restante = 'Você já passou!';
+    }
+    
+    return `Até o momento você tirou em ${results[0].nome} o total de ${results[0].nota}.\n ${restante}`;
   }
 }
 
-module.exports = Helper
+module.exports = Helper_Server
