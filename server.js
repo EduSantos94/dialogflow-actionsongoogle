@@ -168,4 +168,4 @@ app.intent('vestibular',(conv) => {
 
 const expressApp = express().use(bodyParser.json())
 expressApp.post(process.env.POST, app)
-expressApp.listen(process.env.PORT)
+expressApp.listen(process.env.PORT || 3000)
