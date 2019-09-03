@@ -82,7 +82,7 @@ class Helper_Server
   
   aulas_alunos_response(results)
   {
-    if (results[0].nome && results[1].nome === 'vaga') return `hoje você não tem aula`
+    if (results[0].nome && results[1].nome === 'vaga') return `você não tem aula`
       
     if (results[0].nome === 'vaga' && results[1]) {
       return `primeira horario é vago, mas as ${results[1].horario} você tem ${results[1].nome}`
