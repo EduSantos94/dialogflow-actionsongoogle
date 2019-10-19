@@ -6,16 +6,16 @@
 
 class Helper_Server {
   pesquisar_aluno_results(results) {
-    if (typeof results[0] === "undefined") {
-      return `Registro não encontrado, verifique por erros ortograficos`;
+    if (results) {
+      return false;
     } else {
-      return results[0].nome;
+      return true;
     }
   }
 
   notas_alunos_results(results) {
     if (typeof results[0] === "undefined") {
-      return `Registro não encontrado, verifique por erros ortograficos`;
+      return `Registro não encontrado, verifique as informações inseridas ou se está cadastrado no sistema`;
     } else {
       return `sua nota em ${results[0].nome} foi ${results[0].nota}`;
     }
@@ -23,7 +23,7 @@ class Helper_Server {
 
   lista_materia_results(results) {
     if (typeof results[0] === "undefined") {
-      return `registro não encontrado, verifique por erros ortograficos`;
+      return `registro não encontrado, verifique as informações inseridas ou se está cadastrado no sistema`;
     } else {
       return this.lista_materia_response(results);
     }
@@ -31,9 +31,17 @@ class Helper_Server {
 
   aulas_alunos_results(results) {
     if (typeof results[0] === "undefined") {
-      return `registro não encontrado, verifique por erros ortograficos`;
+      return `registro não encontrado, verifique as informações inseridas ou se está cadastrado no sistema`;
     } else {
       return this.aulas_alunos_response(results);
+    }
+  }
+
+  cadastrar_alunos_results(results) {
+    if (results.affectedRows === 0) {
+      return `registro não encontrado, verifique as informações inseridas`;
+    } else {
+      return `cadastro concluído! Agora é possivel acessar suas informações.`;
     }
   }
 

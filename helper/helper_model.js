@@ -38,5 +38,12 @@ class Helper_Model {
       WHERE a.email = ? 
       AND m.nome = ?`;
   }
+
+  cadastrar_alunos_query() {
+    return `UPDATE aluno as a
+      SET a.email = ?
+      WHERE a.id_aluno = ?
+      AND a.cpf = ?`;
+  }
 }
 module.exports = Helper_Model;

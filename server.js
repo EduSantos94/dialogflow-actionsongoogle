@@ -3,7 +3,6 @@
  * API que conecta com o assistente virtual Dialoflow
  * usando o módulo actions on google e Mysql
  */
-
 const {
   dialogflow,
   SignIn,
@@ -94,7 +93,7 @@ app.intent("notas.alunos", (conv, params) => {
 app.intent("lista.materia", (conv, params) => {
   let helper = new Helper();
   const email = conv.user.email;
-
+  console.log("passou");
   let resposta = model
     .lista_materia(email)
     .then(function(results) {
@@ -155,6 +154,36 @@ app.intent("notas.restante", (conv, params) => {
     .notas_restante(materia, email)
     .then(function(results) {
       return helper.notas_restante_results(results);
+    })
+    .catch(err =>
+      setImmediate(() => {
+        throw err;
+      })
+    );
+
+  return resposta.then(function(result) {
+    conv.ask(`${conv.user.profile.payload.name}, ${result}`);
+  });
+});
+
+/*
+ * Interliga as informações do aluno com o bot
+ *
+ * @class Helper
+ * @param string email
+ * @param int id
+ * @param string cpf
+ */
+app.intent("cadastrar.alunos", (conv, params) => {
+  let helper = new Helper();
+  const email = conv.user.email;
+  const id = params.id;
+  const cpf = params.cpf;
+
+  let resposta = model
+    .cadastrar_alunos(email, id, cpf)
+    .then(function(results) {
+      return helper.cadastrar_alunos_results(results);
     })
     .catch(err =>
       setImmediate(() => {

@@ -80,10 +80,25 @@ module.exports = {
     return new Promise(function(resolve, reject) {
       var connection = mysql_connection();
       connection.connect();
-      console.log(email);
       connection.query(
         helper.notas_restante_query(),
         [email, materia],
+        function(error, results, fields) {
+          if (error) return reject(error);
+          connection.end();
+          resolve(results);
+        }
+      );
+    });
+  },
+
+  cadastrar_alunos: async function(email, id, cpf) {
+    return new Promise(function(resolve, reject) {
+      var connection = mysql_connection();
+      connection.connect();
+      connection.query(
+        helper.cadastrar_alunos_query(),
+        [email, id, cpf],
         function(error, results, fields) {
           if (error) return reject(error);
           connection.end();
